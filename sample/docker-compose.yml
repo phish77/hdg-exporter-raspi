@@ -20,8 +20,8 @@ services:
     image: grafana/grafana:latest
     environment:
       GF_USERS_DEFAULT_THEME: light
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: lokaladmin
+      GF_SECURITY_ADMIN_PASSWORD: G8973rn&hdi)6
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
@@ -31,7 +31,7 @@ services:
   hdg-exporter:
     image: ghcr.io/srt/hdg-exporter
     environment:
-      HDG_ENDPOINT: http://10.23.24.10
+      HDG_ENDPOINT: http://192.168.178.10
     expose:
       - 8080
 
