@@ -27,7 +27,7 @@ services:
     ports:
       - 3000:3000
   hdg-exporter:
-    image: ghrc.io/phish77/hdg-auswertung
+    image: phish77/hdg-auswertung
     environment:
       HDG_ENDPOINT: http://192.168.178.10
     expose:
