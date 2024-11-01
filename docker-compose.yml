@@ -15,7 +15,7 @@ services:
     expose:
       - 9090
   grafana:
-    image: arm32v7/grafana
+    image: grafana/grafana:10.0.3
     environment:
       GF_USERS_DEFAULT_THEME: light
       GF_SECURITY_ADMIN_USER: lokaladmin
@@ -27,7 +27,7 @@ services:
     ports:
       - 3000:3000
   hdg-exporter:
-    image: ghcr.io/srt/hdg-exporter
+    image: github.com/phish77/hdg-auswertung
     environment:
       HDG_ENDPOINT: http://192.168.178.10
     expose:
