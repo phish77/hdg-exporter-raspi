@@ -19,6 +19,10 @@ Just update the environment variables in `app.env`.
    3.1 Pull the file `setup_docker-dirs.sh` into your home dir on your Raspi: `curl -L https://raw.githubusercontent.com/phish77/hdg-exporter-raspi/main/runfirst/setup_docker_dirs.sh -o setup_docker_dirs.sh`<br>
    3.2 Make the script executable: `chmod +x setup_docker_dirs.sh`<br>
    3.3 Run the script: `./setup_docker_dirs.sh`<br>
+   3.4 Start Portainer: `docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v portainer_data:/data \`
+  portainer/portainer-ce:latest
 5. Create a new stack in Portainer<br>
    4.1 Open Portainer in your browser: `https://IP_OF_YOUR_RASPI:9443`
    4.2 
