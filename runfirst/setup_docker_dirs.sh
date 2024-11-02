@@ -9,7 +9,7 @@ BASE_DIR="/home/docker/docker"
 sudo mkdir -p $BASE_DIR/prometheus
 sudo mkdir -p $BASE_DIR/grafana/provisioning/datasources
 sudo mkdir -p $BASE_DIR/grafana/provisioning/dashboards
-sudo mkdir -p $BASE_DIR/hdg-exporter
+sudo mkdir -p $BASE_DIR/hdg-exporter-raspi
 
 # Berechtigungen setzen
 sudo chown -R docker:docker $BASE_DIR
