@@ -4,7 +4,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o hdg-exporter-raspi
 
 FROM scratch
-LABEL maintainer="dein.name@example.com"
+LABEL maintainer="benjamin.goetzinger@gmx.de"
 LABEL version="1.0"
 LABEL description="HDG Exporter for Raspberry Pi"
 
