@@ -14,6 +14,11 @@ Just update the environment variables in `app.env`.
    2.1 Download `runfirst_install_portainer.sh` onto Raspi
    2.2 Make executable `chmod +x runfirst_install_portainer.sh`
    2.3 Run the script: `./runfirst_install_portainer.sh`
+4. Create .env file
+   4.1 CD into `/home/docker/docker/` and add a password for your access to Grafana and the IP of your HDG heating system by running `echo -e "GRAFANA_ADMIN_PASSWORD=your _secure_password\nHDG_ENDPOINT=http://ip_of_your_heating_system" > .env`
+   4.2 Check the file using `cat .env`
+   4.3 Add the file to .gitignore if using Git: `echo ".env" >> .gitignore`
+   4.4 Set permissions: `chmod 600 .env`
 4. Pull the file https://github.com/phish77/hdg-auswertung/blob/main/runfirst_setup_docker-dirs.sh into your home dir on your Raspi
 5. Make the script executable: `chmod +x /home/docker/docker/setup_docker_dirs.sh`
 6. Run the script: `/home/docker/docker/setup_docker_dirs.sh`
