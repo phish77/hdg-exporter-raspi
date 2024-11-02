@@ -65,8 +65,8 @@ HDG Exporter Raspi is configured via environment variables. The following variab
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
 | `GRAFANA_ADMIN_PASSWORD` | Password for Grafana                                                                                                                                   | `Password1234;-)`     |
 | `HDG_ENDPOINT`           | URL of the heating system                                                                                                                              | `http://192.168.1.10` |
-| `HDG_LANGUAGE`           | Language for the interface (`dansk`, `deutsch`, `english`, `franzoesisch`, `italienisch`, `niederlaendisch`, etc.)                                    | `deutsch`             |
-| `HDG_IDS`                | Comma-separated list of IDs to be exported. These can be obtained from the web interface or from [data.json](data.json).                              |                       |
+| `HDG_LANGUAGE`           | Language for the interface (`dansk`, `deutsch`, `english`, `franzoesisch`, `italienisch`, `niederlaendisch`, etc.)                                     | `deutsch`             |
+| `HDG_IDS`                | Comma-separated list of IDs to be exported. These can be obtained from the web interface or from [data.json](data.json).  Also see this [wiki](https://github.com/SteMaker/ioBroker.hdg-bavaria/wiki) on how to get to the IDs via myHDGnext.         |                       |
 
 ## Grafana Dashboard
 
