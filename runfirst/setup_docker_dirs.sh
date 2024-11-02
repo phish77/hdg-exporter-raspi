@@ -6,20 +6,16 @@
 BASE_DIR="/home/docker/docker"
 
 # Verzeichnisse erstellen
-mkdir -p $BASE_DIR/prometheus
-mkdir -p $BASE_DIR/grafana/provisioning/datasources
-mkdir -p $BASE_DIR/grafana/provisioning/dashboards
-mkdir -p $BASE_DIR/hdg-exporter
-
-#Sicherstellen, dass Datei existiert:
-touch /home/docker/docker/prometheus/prometheus.yml
-
+sudo mkdir -p $BASE_DIR/prometheus
+sudo mkdir -p $BASE_DIR/grafana/provisioning/datasources
+sudo mkdir -p $BASE_DIR/grafana/provisioning/dashboards
+sudo mkdir -p $BASE_DIR/hdg-exporter
 
 # Berechtigungen setzen
-chown -R docker:docker $BASE_DIR
-chmod -R 755 $BASE_DIR
+sudo chown -R docker:docker $BASE_DIR
+sudo chmod -R 755 $BASE_DIR
 
 #Sicherstellen, dass Datei existiert:
-touch /home/docker/docker/prometheus/prometheus.yml
+sudo touch /home/docker/docker/prometheus/prometheus.yml
 
 echo "Verzeichnisse wurden erstellt und Berechtigungen gesetzt."
