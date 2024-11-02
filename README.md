@@ -9,7 +9,7 @@ You can find a sample `docker-compose.yml` with Prometheus, Grafana and hdg-expo
 Just update the environment variables in `app.env`.
 
 ## Prerequisites
-1. Install Raspian OS 64bit via Raspberry Pi Imager
+1. Install Raspian OS 64bit via Raspberry Pi Imager with a user "docker"
 2. Install Portainer<br>
    2.1 Download `runfirst_install_portainer.sh` onto Raspi<br>
    2.2 Make executable `chmod +x runfirst_install_portainer.sh`<br>
