@@ -16,7 +16,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/srt/hdg-exporter
+          images: ghcr.io/phish77/hdg-exporter-raspi
           flavor: latest=true
           tags: |
             type=ref,event=branch
