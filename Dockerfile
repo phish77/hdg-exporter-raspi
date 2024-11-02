@@ -1,11 +1,19 @@
 FROM golang:1.19 AS builder
-WORKDIR /hdg-exporter
+WORKDIR /hdg-exporter-raspi
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o hdg-exporter
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o hdg-exporter-raspi
 
 FROM scratch
-EXPOSE 8080
-COPY --from=builder /hdg-exporter/hdg-exporter /hdg-exporter
-COPY --from=builder /hdg-exporter/app.env /app.env
+LABEL maintainer="dein.name@example.com"
+LABEL version="1.0"
+LABEL description="HDG Exporter for Raspberry Pi"
 
-ENTRYPOINT ["/hdg-exporter"]
+EXPOSE 8080
+
+COPY --from=builder /hdg-exporter-raspi/hdg-exporter-raspi /hdg-exporter-raspi
+COPY --from=builder /hdg-exporter-raspi/app.env /app.env
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+ENTRYPOINT ["/hdg-exporter-raspi"]
