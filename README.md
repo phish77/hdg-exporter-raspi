@@ -28,7 +28,7 @@ Just update the environment variables in `app.env`.
    4.2 Click on "local" Docker and then on "Stacks"
    4.3 Click "Add stack" and choose "Repository"<br>
       4.3.1 Give it a name<br>
-      4.3.2 Repository URL: `https://github.com/phish77/hdg-exporter-raspi` (leave "Repository reference" and "Compose path" at default)<br>
+      4.3.2 Repository URL: `https://github.com/phish77/hdg-exporter-raspi.git` (leave "Repository reference" and "Compose path" at default)<br>
       4.3.2 Add the "Environment variables" manually (see below)<br>
       4.3.4 Click "Deploy the stack"   
    
