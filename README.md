@@ -25,13 +25,20 @@ Just update the environment variables in `app.env`.
   portainer/portainer-ce:latest`
 5. Create a new stack in Portainer<br>
    4.1 Open Portainer in your browser: `https://IP_OF_YOUR_RASPI:9443`
-   4.2 
+   4.2 Click on "local" Docker and then on "Stacks"
+   4.3 Click "Add stack" and choose "Repository"<br>
+      4.3.1 Give it a name<br>
+      4.3.2 Repository URL: `https://github.com/phish77/hdg-exporter-raspi` (leave "Repository reference" and "Compose path" at default)<br>
+      4.3.2 Add the "Environment variables" manually (see below)<br>
+      4.3.4 Click "Deploy the stack"   
+   
+   
    
 
 
-## Configuration
+## Configuration of environment variables
 
-HDG Exporter Raspi is configured via environment variables. The following variables are supported. You have to set these via 
+HDG Exporter Raspi is configured via environment variables. The following variables are supported. You have to set these via "+ Add an enviroment variable" when creating the Stack in Portainer.io:
 
 | Variable                  | Description                                                                                                                                              | Example               |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
