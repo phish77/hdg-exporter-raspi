@@ -15,7 +15,11 @@ Just update the environment variables in `app.env`.
    2.2 Make executable `chmod +x runfirst_install_portainer.sh`<br>
    2.3 Run the script: `./runfirst_install_portainer.sh`<br>
 4. Create .env file<br>
-   4.1 CD into `/home/docker/docker/` and add a password for your access to Grafana and the IP of your HDG heating system by running `echo -e "GRAFANA_ADMIN_PASSWORD=your _secure_password\nHDG_ENDPOINT=http://ip_of_your_heating_system" > .env`<br>
+   4.1 CD into `/home/docker/docker/` and set the variables according to your setup<br>
+      `echo "GRAFANA_ADMIN_PASSWORD=Password1234;-)" > .env` // Set Grafana Password<br>
+      `echo "HDG_ENDPOINT=http://192.168.1.10" >> .env` // Set IP of your HDG heating system<br>
+      `echo "HDG_LANGUAGE=deutsch" >> .env` // Set language (one of `dansk`, `deutsch`, `english`, `franzoesisch`, `italienisch`, `niederlaendisch`, `norwegisch`, `polnisch`, `schwedisch`, `slowenisch`, `spanisch`)<br>
+      `echo "HDG_IDS=id1,id2,id3" >> .env`// Comma separated list of ids to export. Can be obtained from the Web UI or from [data.json](data.json). <br>
    4.2 Check the file using `cat .env`<br>
    4.3 Add the file to .gitignore if using Git: `echo ".env" >> .gitignore`<br>
    4.4 Set permissions: `chmod 600 .env`<br>
