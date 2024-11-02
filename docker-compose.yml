@@ -43,7 +43,7 @@ services:
       retries: 3
 
   hdg-exporter:
-    build: ./hdg-exporter-raspi
+    image: ghcr.io/phish77/hdg-exporter-raspi:latest
     container_name: hdg-exporter-raspi
     restart: unless-stopped
     environment:
