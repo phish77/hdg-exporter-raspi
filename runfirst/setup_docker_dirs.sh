@@ -19,4 +19,7 @@ touch /home/docker/docker/prometheus/prometheus.yml
 chown -R docker:docker $BASE_DIR
 chmod -R 755 $BASE_DIR
 
+#Sicherstellen, dass Datei existiert:
+touch /home/docker/docker/prometheus/prometheus.yml
+
 echo "Verzeichnisse wurden erstellt und Berechtigungen gesetzt."
