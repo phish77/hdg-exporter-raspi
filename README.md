@@ -10,11 +10,14 @@ Just update the environment variables in `app.env`.
 
 ## Prerequisites
 1. Install Raspian OS 64bit via Raspberry Pi Imager
-2. Install Portainer using this tutorial: https://www.heise.de/news/Wie-man-Docker-auf-dem-Raspberry-Pi-in-15-Minuten-einrichtet-7524692.html
-3. Pull the file https://github.com/phish77/hdg-auswertung/blob/main/runfirst_setup_docker-dirs.sh into your home dir on your Raspi
-4. Make the script executable: `chmod +x /home/docker/docker/setup_docker_dirs.sh`
-5. Run the script: `/home/docker/docker/setup_docker_dirs.sh`
-6. Create a new stack in Portainer
+2. Install Portainer
+   2.1 Download `runfirst_install_portainer.sh` onto Raspi
+   2.2 Make executable `chmod +x runfirst_install_portainer.sh`
+   2.3 Run the script: `./runfirst_install_portainer.sh`
+4. Pull the file https://github.com/phish77/hdg-auswertung/blob/main/runfirst_setup_docker-dirs.sh into your home dir on your Raspi
+5. Make the script executable: `chmod +x /home/docker/docker/setup_docker_dirs.sh`
+6. Run the script: `/home/docker/docker/setup_docker_dirs.sh`
+7. Create a new stack in Portainer
 
 
 ## Configuration
