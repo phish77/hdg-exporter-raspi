@@ -11,15 +11,16 @@ Just update the environment variables in `app.env`.
 ## Prerequisites
 1. Install Raspian OS 64bit via Raspberry Pi Imager with a user "docker"
 2. Install Portainer<br>
-   2.1 Download `runfirst_install_portainer.sh` onto Raspi: `curl -L https://raw.githubusercontent.com/phish77/hdg-exporter-raspi/main/runfirst/install_portainer.sh -o install_portainer.sh
-`<br>
+   2.1 Download `runfirst_install_portainer.sh` onto Raspi: `curl -L https://raw.githubusercontent.com/phish77/hdg-exporter-raspi/main/runfirst/install_portainer.sh -o install_portainer.sh`<br>
    2.2 Make executable `chmod +x install_portainer.sh`<br>
    2.3 Run the script: `./install_portainer.sh`<br>
-3. Pull the file https://github.com/phish77/hdg-auswertung/blob/main/setup_docker-dirs.sh into your home dir on your Raspi
-4. Make the script executable: `chmod +x /home/docker/docker/setup_docker_dirs.sh`
-5. Run the script: `/home/docker/docker/setup_docker_dirs.sh`
-6. Create a new stack in Portainer<br>
-   6.1 Give it a name
+3. Create the necessary directories:<br>
+   3.1 Pull the file `setup_docker-dirs.sh` into your home dir on your Raspi: `curl -L https://raw.githubusercontent.com/phish77/hdg-exporter-raspi/main/runfirst/setup_docker_dirs.sh -o setup_docker_dirs.sh`<br>
+   3.2 Make the script executable: `chmod +x /home/docker/docker/setup_docker_dirs.sh`<br>
+   3.3 Run the script: `/home/docker/docker/setup_docker_dirs.sh`<br>
+4. Create a new stack in Portainer<br>
+   4.1 Open Portainer in your browser: `https://IP_OF_YOUR_RAPSI:9443`
+   4.2 
    
 
 
