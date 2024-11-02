@@ -11,7 +11,6 @@ LABEL description="HDG Exporter for Raspberry Pi"
 EXPOSE 8080
 
 COPY --from=builder /hdg-exporter-raspi/hdg-exporter-raspi /hdg-exporter-raspi
-COPY --from=builder /hdg-exporter-raspi/app.env /app.env
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
