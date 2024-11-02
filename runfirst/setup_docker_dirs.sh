@@ -11,6 +11,10 @@ mkdir -p $BASE_DIR/grafana/provisioning/datasources
 mkdir -p $BASE_DIR/grafana/provisioning/dashboards
 mkdir -p $BASE_DIR/hdg-exporter
 
+#Sicherstellen, dass Datei existiert:
+touch /home/docker/docker/prometheus/prometheus.yml
+
+
 # Berechtigungen setzen
 chown -R docker:docker $BASE_DIR
 chmod -R 755 $BASE_DIR
