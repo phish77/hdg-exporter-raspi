@@ -20,7 +20,7 @@ Just update the environment variables in `app.env`.
    3.2 Make the script executable: `chmod +x setup_docker_dirs.sh`<br>
    3.3 Run the script: `./setup_docker_dirs.sh`<br>
 5. Create a new stack in Portainer<br>
-   4.1 Open Portainer in your browser: `https://IP_OF_YOUR_RAPSI:9443`
+   4.1 Open Portainer in your browser: `https://IP_OF_YOUR_RASPI:9443`
    4.2 
    
 
