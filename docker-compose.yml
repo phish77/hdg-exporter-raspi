@@ -1,6 +1,8 @@
+version: '3.8'
+
 services:
   prometheus:
-    image: prom/prometheus-linux-arm64
+    image: prom/prometheus:latest
     container_name: prometheus
     restart: unless-stopped
     command:
@@ -10,29 +12,52 @@ services:
       - "--web.console.templates=/etc/prometheus/consoles"
       - "--web.enable-lifecycle"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /home/docker/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
-    expose:
-      - 9090
+    ports:
+      - "9090:9090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   grafana:
-    image: grafana/grafana:latest-ubuntu
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
     environment:
       GF_USERS_DEFAULT_THEME: light
       GF_SECURITY_ADMIN_USER: lokaladmin
-      GF_SECURITY_ADMIN_PASSWORD: G8973rn&hdi)6
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - /home/docker/docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - /home/docker/docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     ports:
-      - 3000:3000
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   hdg-exporter:
-    image: ghcr.io/srt/hdg-exporter
+    build: ./hdg-exporter-raspi
+    container_name: hdg-exporter-raspi
+    restart: unless-stopped
     environment:
-      HDG_ENDPOINT: http://192.168.178.10
-    expose:
-      - 8080
+      HDG_ENDPOINT: ${HDG_ENDPOINT}
+      HDG_LANGUAGE: ${HDG_LANGUAGE}
+      HDG_IDS: ${HDG_IDS}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
-  grafana-data: {}
-  prometheus-data: {}
+  grafana-data:
+  prometheus-data:
