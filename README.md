@@ -14,6 +14,7 @@ Just update the environment variables in `app.env`.
 3. Pull the file https://github.com/phish77/hdg-auswertung/blob/main/runfirst_setup_docker-dirs.sh into your home dir on your Raspi
 4. Make the script executable: `chmod +x /home/docker/docker/setup_docker_dirs.sh`
 5. Run the script: `/home/docker/docker/setup_docker_dirs.sh`
+6. Create a new stack in Portainer
 
 
 ## Configuration
