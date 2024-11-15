@@ -3,7 +3,7 @@ global:
   scrape_timeout: 10s
   evaluation_interval: 15s
 scrape_configs:
-  - job_name: hdg-exporter
+  - job_name: hdg-exporter-raspi
     honor_timestamps: true
     scrape_interval: 1m
     scrape_timeout: 30s
@@ -11,4 +11,4 @@ scrape_configs:
     scheme: http
     static_configs:
       - targets:
-          - hdg-exporter:8080
+          - hdg-exporter-raspi:8080
