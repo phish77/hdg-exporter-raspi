@@ -4,7 +4,7 @@ Prometheus exporter for HDG Bavaria heating systems, developed for Raspian OS 64
 
 ## Docker
 
-A Docker image is available at `ghcr.io/srt/hdg-exporter`. A sample `docker-compose.yml` file with Prometheus, Grafana, and hdg-exporter can be found in the `samples` directory. Just update the environment variables in `app.env`.
+A Docker image is available at `ghcr.io/srt/hdg-exporter`. A sample `docker-compose.yml` file with Prometheus, Grafana, and hdg-exporter can be found in the `samples` directory. Just update the environment variables in `app.env` or enter them when running the `setup_directories_and_env.sh` script.
 
 ## Prerequisites
 
@@ -27,17 +27,17 @@ A Docker image is available at `ghcr.io/srt/hdg-exporter`. A sample `docker-comp
      ```
 
 3. **Create necessary directories:**
-   - Download the script `setup_docker_dirs.sh` into your home directory on the Raspi:  
+   - Download the script `runfirst/setup_directories_and_env.sh` into your home directory on the Raspi:  
      ```bash
-     curl -L https://raw.githubusercontent.com/phish77/hdg-exporter-raspi/main/runfirst/setup_docker_dirs.sh -o setup_docker_dirs.sh
+     curl -L https://raw.githubusercontent.com/phish77/hdg-exporter-raspi/main/runfirst/setup_directories_and_env.sh -o setup_directories_and_env.sh
      ```
    - Make the script executable:  
      ```bash
-     chmod +x setup_docker_dirs.sh
+     chmod +x setup_directories_and_env.sh
      ```
    - Run the script:  
      ```bash
-     ./setup_docker_dirs.sh
+     ./setup_directories_and_env.sh
      ```
    - Start Portainer:  
      ```bash
@@ -59,7 +59,7 @@ A Docker image is available at `ghcr.io/srt/hdg-exporter`. A sample `docker-comp
 
 ## Configuration of Environment Variables
 
-HDG Exporter Raspi is configured via environment variables. Use the .env.example file and save it in /srv/hdg-exporter/.env on your server and fill in your variables. The following variables are supported and must be set when creating the stack in Portainer:
+HDG Exporter Raspi is configured via environment variables. Use the app.env.example file in /srv/hdg-exporter/app.env on your server and fill in your variables (they should be created when setting up via setup_directories_and_env.sh). The following variables are supported and must be set when creating the stack in Portainer:
 
 | Variable                 | Description                                                                                                                                            | Example               |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
