@@ -52,16 +52,19 @@ if [ ! -f "$PROM_CONFIG" ]; then
   cat <<EOF | sudo tee "$PROM_CONFIG" > /dev/null
 global:
   scrape_interval: 15s
+  scrape_timeout: 10s
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'hdg-exporter'
+  - job_name: hdg-exporter-raspi
+    honor_timestamps: true
+    scrape_interval: 1m
+    scrape_timeout: 30s
+    metrics_path: /metrics
+    scheme: http
     static_configs:
-      - targets: ['hdg-exporter-raspi:8080']
-
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
+      - targets:
+          - hdg-exporter-raspi:8080
 EOF
 else
   echo "✔️ Prometheus-Konfiguration existiert bereits: $PROM_CONFIG"
