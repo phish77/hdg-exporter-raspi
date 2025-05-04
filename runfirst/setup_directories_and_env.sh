@@ -6,11 +6,30 @@ ENV_FILE="$BASE_DIR/hdg-exporter/app.env"
 
 # 🧩 Interaktive Eingabe der Variablen
 
-echo "🔐 Bitte gib das Grafana Admin-Passwort ein:"
-read -s -p "Grafana Admin Password: " GRAFANA_ADMIN_PASSWORD
-echo ""
+# 🔐 Passwort mit Bestätigung
+while true; do
+  read -s -p "Grafana Admin Password: " GRAFANA_ADMIN_PASSWORD
+  echo
+  read -s -p "Passwort wiederholen: " GRAFANA_ADMIN_PASSWORD_CONFIRM
+  echo
+  if [ "$GRAFANA_ADMIN_PASSWORD" = "$GRAFANA_ADMIN_PASSWORD_CONFIRM" ]; then
+    break
+  else
+    echo "❌ Passwörter stimmen nicht überein. Bitte erneut eingeben."
+  fi
+done
 
-read -p "🌐 Bitte gib die HDG-Endpoint-Adresse ein (z. B. http://192.168.178.88): " HDG_ENDPOINT
+
+# 🌐 HDG Endpoint: Nur IP (kein http, kein Port)
+while true; do
+  read -p "HDG Endpoint (nur IP, z. B. 192.168.178.88): " HDG_ENDPOINT
+
+  if [[ "$HDG_ENDPOINT" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+    break
+  else
+    echo "❌ Ungültige IP-Adresse. Bitte ohne http:// und Port eingeben."
+  fi
+done
 
 echo ""
 echo "🌍 Wähle eine Sprache (Eingabe):"
