@@ -1,17 +1,13 @@
 #!/bin/bash
 
-
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🛠️  Willkommen im Setup der persistenten Verzeichnisse"
 echo "   und der Environment-Variablen für HDG-Exporter!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
 
-# Diese Datei vor dem ersten Stack-Deploy ausführen
+# Basisverzeichnis
 BASE_DIR="/srv"
 ENV_FILE="$BASE_DIR/hdg-exporter/app.env"
-
-# 🧩 Interaktive Eingabe der Variablen
 
 # 🔐 Passwort mit Bestätigung
 while true; do
@@ -26,11 +22,9 @@ while true; do
   fi
 done
 
-
 # 🌐 HDG Endpoint: Nur IP (kein http, kein Port)
 while true; do
   read -p "HDG Endpoint (nur IP, z. B. 192.168.178.88): " HDG_ENDPOINT
-
   if [[ "$HDG_ENDPOINT" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
     break
   else
@@ -38,16 +32,16 @@ while true; do
   fi
 done
 
-echo ""
-echo "🌍 Wähle eine Sprache (Eingabe):"
+# 🌍 Sprache auswählen
+echo
+echo "🌍 Wähle eine Sprache:"
 LANG_OPTIONS=("dansk" "deutsch" "english" "franzoesisch" "italienisch" "niederlaendisch" "norwegisch" "polnisch" "schwedisch" "slowenisch" "spanisch")
-
 select LANGUAGE in "${LANG_OPTIONS[@]}"; do
   if [[ -n "$LANGUAGE" ]]; then
     echo "✔️ Sprache gewählt: $LANGUAGE"
     break
   else
-    echo "❌ Ungültige Auswahl. Bitte versuche es erneut."
+    echo "❌ Ungültige Auswahl. Bitte erneut wählen."
   fi
 done
 
@@ -58,24 +52,24 @@ sudo mkdir -p "$BASE_DIR/hdg-exporter"
 sudo mkdir -p "$BASE_DIR/grafana/data"
 sudo mkdir -p "$BASE_DIR/grafana/provisioning/dashboards"
 sudo mkdir -p "$BASE_DIR/grafana/provisioning/datasources"
+sudo mkdir -p "$BASE_DIR/grafana/dashboards"
 sudo mkdir -p "$BASE_DIR/prometheus/config"
 sudo mkdir -p "$BASE_DIR/prometheus/data"
 
-# 📄 app.env schreiben
+# 📝 app.env schreiben
 cat <<EOF | sudo tee "$ENV_FILE" > /dev/null
 GRAFANA_ADMIN_PASSWORD=$GRAFANA_ADMIN_PASSWORD
-HDG_ENDPOINT=$HDG_ENDPOINT
+HDG_ENDPOINT=http://$HDG_ENDPOINT
 HDG_LANGUAGE=$LANGUAGE
-HDG_IDS=2101,2104,2106,2107,2108,2109,2110,2114,2115,2116,2117,2123,2205,2206,2207,2302,2304,2305,2306,2307,2308,2309,2310,2401,2402,2403,2601,2605,2615,2616,2617,2618,2619,2623,2624,2625,2626,2627,2628,2644,2680,2681,2682,2683,2684,2685,2701,2702,2703,2704,2711,2805,2816,4021,4022,4023,4024,4025,4026,4027,4028,4029,4030,4031,4032,4033,4034,4036,4040,4045,4070,4090,4091,4095,6008,6022,6023,6108,6122,6123,8021,8022,8024,8026,8041,20000,20029,20032,20033,21014,22000,22001,22002,22003,22004,22005,22008,22009,22010,22011,22012,22013,22014,22015,22016,22018,22019,22021,22022,22023,22028,22030,22031,22032,22033,22034,22037,22038,22039,22050,22063,22069,22098,22099,24000,24001,24002,24004,24006,24013,24014,24015,24098,24099,26000,26002,26003,26004,26007,26008,26011,26099,26100,26102,26103,26104,26107,26108,26111,26199,28000,28003,28004,28005,28098,28099
+HDG_IDS=123,456,789
 EOF
-
 echo "📄 app.env wurde erfolgreich geschrieben: $ENV_FILE"
 
-# 📄 Prometheus-Konfiguration anlegen (falls nicht vorhanden)
+# 🔧 prometheus.yml schreiben
 PROM_CONFIG="$BASE_DIR/prometheus/config/prometheus.yml"
-if [ ! -f "$PROM_CONFIG" ]; then
-  echo "📄 Erzeuge Prometheus-Konfiguration unter $PROM_CONFIG"
-  cat <<EOF | sudo tee "$PROM_CONFIG" > /dev/null
+[ -d "$PROM_CONFIG" ] && sudo rm -rf "$PROM_CONFIG"
+
+cat <<EOF | sudo tee "$PROM_CONFIG" > /dev/null
 global:
   scrape_interval: 15s
   scrape_timeout: 10s
@@ -92,9 +86,1675 @@ scrape_configs:
       - targets:
           - hdg-exporter-raspi:8080
 EOF
-else
-  echo "✔️ Prometheus-Konfiguration existiert bereits: $PROM_CONFIG"
-fi
+echo "📄 prometheus.yml geschrieben: $PROM_CONFIG"
+
+# 📊 dashboard.yml schreiben
+cat <<EOF | sudo tee "$BASE_DIR/grafana/provisioning/dashboards/dashboard.yml" > /dev/null
+apiVersion: 1
+
+providers:
+  - name: "default"
+    orgId: 1
+    folder: ""
+    folderUid: ""
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+EOF
+echo "📄 dashboard.yml geschrieben."
+
+# 📊 DHG.json schreiben
+cat <<'EOF' | sudo tee "$BASE_DIR/grafana/dashboards/DHG.json" > /dev/null
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*temperatur"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 10
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"2200[01]|2605\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Temperaturen",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*temperatur"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 10
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"22003|22022\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"22004\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"22023\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}} Soll",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Temperaturen Kessel und Rücklauf",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Materialmenge"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"22005|2615|2616\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Materialmenge",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Fühler.*"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 10
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"2400[012]\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"24004\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}} (oben)",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"24006\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}} (unten)",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Puffer",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Restsauerstoff Ist"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22002\"}",
+          "legendFormat": "{{desc1}} Ist",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22050\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}} Soll",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Restsauerstoff",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "Fühler.*"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 10
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"2800[012]\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"802[1-9]\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Brauchwasser",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"2200[89]\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"22019|22033\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}} (Soll)",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Luftklappen",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kesselstatus"
+            },
+            "properties": [
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"}",
+          "hide": true,
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 16 >bool 0",
+          "hide": false,
+          "legendFormat": "Ausbrennen",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "(hdg_value{id=\"22010\"} == 0 >bool 0) + 1",
+          "hide": false,
+          "legendFormat": "Störung",
+          "range": true,
+          "refId": "K"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 18 >bool 0",
+          "hide": false,
+          "legendFormat": "Restwärme",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "(hdg_value{id=\"22010\"} == 8 >bool 0) + 0.5",
+          "hide": false,
+          "legendFormat": "Automatik",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 2 >bool 0",
+          "hide": false,
+          "legendFormat": "Entaschen",
+          "range": true,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 3 >bool 0",
+          "hide": false,
+          "legendFormat": "Vorbelüften",
+          "range": true,
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 4 >bool 0",
+          "hide": false,
+          "legendFormat": "Füllen",
+          "range": true,
+          "refId": "G"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 5 >bool 0",
+          "hide": false,
+          "legendFormat": "Anzünden",
+          "range": true,
+          "refId": "H"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "(hdg_value{id=\"22010\"} == 1 >bool 0) - 0.5",
+          "hide": false,
+          "legendFormat": "Bereit",
+          "range": true,
+          "refId": "J"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 7 >bool 0",
+          "hide": false,
+          "legendFormat": "Anheizen",
+          "range": true,
+          "refId": "I"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=\"22010\"} == 6 >bool 0",
+          "hide": false,
+          "legendFormat": "Anzünden kühlen",
+          "range": true,
+          "refId": "L"
+        }
+      ],
+      "title": "Kesselstatus",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "id": 22,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "avg_over_time((hdg_value{desc1=\"Kesselstatus\"} ==bool 8)[$__range:1m]) * $__range_s / 3600",
+          "instant": false,
+          "legendFormat": "Stunden im Zustand \"Automatik\"",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Stunden im Zustand \"Automatik\" im gewählten Zeitfenster",
+      "type": "stat"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 12,
+        "x": 0,
+        "y": 44
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"2201[12345]|2203[789]\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Betriebsstunden",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 16,
+        "w": 12,
+        "x": 12,
+        "y": 44
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "sortBy": "Last",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "increase(hdg_value{id=~\"2201[12345]|2203[789]\"}[1w])",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Betriebsstunden pro Woche",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 3,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 60
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"22069\"}*1000",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Wärmeenergie",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "temperature"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 60
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "increase(hdg_value{id=~\"22069\"}[7d])*1000",
+          "legendFormat": "Wärmeenergie pro Woche",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "hdg_value{id=\"20000\"}",
+          "hide": false,
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "temperature"
+        }
+      ],
+      "title": "Wärmeenergie pro Woche",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {},
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 68
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "TDVKLIv4z"
+          },
+          "editorMode": "code",
+          "expr": "hdg_value{id=~\"22028\"}",
+          "legendFormat": "{{desc1}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Wirkungsgrad",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "HDG",
+  "uid": "yjl9FE3nz",
+  "version": 26,
+  "weekStart": ""
+}
+EOF
+echo "📄 DHG.json geschrieben."
 
 # 🔐 Rechte setzen
 echo "🔐 Setze Verzeichnisrechte..."
@@ -102,41 +1762,5 @@ echo "🔐 Setze Verzeichnisrechte..."
 sudo chown -R 472:472 "$BASE_DIR/grafana"
 sudo chown -R 65534:65534 "$BASE_DIR/prometheus"
 sudo chmod -R 755 "$BASE_DIR/hdg-exporter"
-
-
-
-
-# 📦 Grafana Dashboards kopieren (falls noch nicht vorhanden)
-SOURCE_DASHBOARD_DIR="$(cd "$(dirname "$0")/../sample/grafana/provisioning/dashboards" && pwd)"
-TARGET_DASHBOARD_DEF_DIR="$BASE_DIR/grafana/provisioning/dashboards"
-TARGET_DASHBOARD_JSON_DIR="$BASE_DIR/grafana/dashboards"
-
-echo "📦 Bereite Grafana Dashboard-Provisionierung vor..."
-
-# Erstelle Zielverzeichnis für JSON-Dashboards
-sudo mkdir -p "$TARGET_DASHBOARD_JSON_DIR"
-
-# Kopiere dashboard.yml
-if [ -f "$SOURCE_DASHBOARD_DIR/dashboard.yml" ]; then
-  sudo cp "$SOURCE_DASHBOARD_DIR/dashboard.yml" "$TARGET_DASHBOARD_DEF_DIR/dashboard.yml"
-  echo "✔️ dashboard.yml kopiert nach $TARGET_DASHBOARD_DEF_DIR"
-else
-  echo "⚠️ WARNUNG: dashboard.yml nicht gefunden unter $SOURCE_DASHBOARD_DIR"
-fi
-
-# Kopiere DHG.json Dashboard-Datei
-if [ -f "$SOURCE_DASHBOARD_DIR/DHG.json" ]; then
-  sudo cp "$SOURCE_DASHBOARD_DIR/DHG.json" "$TARGET_DASHBOARD_JSON_DIR/DHG.json"
-  echo "✔️ DHG.json kopiert nach $TARGET_DASHBOARD_JSON_DIR"
-else
-  echo "⚠️ WARNUNG: DHG.json nicht gefunden unter $SOURCE_DASHBOARD_DIR"
-fi
-
-# Rechte setzen (für Grafana: UID 472)
-sudo chown -R 472:472 "$BASE_DIR/grafana"
-
-echo "📊 Grafana Dashboards vorbereitet."
-
-
 
 echo "✅ Setup abgeschlossen. Du kannst den Stack jetzt in Portainer deployen."
