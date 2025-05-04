@@ -77,4 +77,40 @@ sudo chown -R 472:472 "$BASE_DIR/grafana"
 sudo chown -R 65534:65534 "$BASE_DIR/prometheus"
 sudo chmod -R 755 "$BASE_DIR/hdg-exporter"
 
+
+
+
+# 📦 Grafana Dashboards kopieren (falls noch nicht vorhanden)
+SOURCE_DASHBOARD_DIR="$(dirname "$0")/../sample/grafana/provisioning/dashboards"
+TARGET_DASHBOARD_DEF_DIR="$BASE_DIR/grafana/provisioning/dashboards"
+TARGET_DASHBOARD_JSON_DIR="$BASE_DIR/grafana/dashboards"
+
+echo "📦 Bereite Grafana Dashboard-Provisionierung vor..."
+
+# Erstelle Zielverzeichnis für JSON-Dashboards
+sudo mkdir -p "$TARGET_DASHBOARD_JSON_DIR"
+
+# Kopiere dashboard.yml
+if [ -f "$SOURCE_DASHBOARD_DIR/dashboard.yml" ]; then
+  sudo cp "$SOURCE_DASHBOARD_DIR/dashboard.yml" "$TARGET_DASHBOARD_DEF_DIR/dashboard.yml"
+  echo "✔️ dashboard.yml kopiert nach $TARGET_DASHBOARD_DEF_DIR"
+else
+  echo "⚠️ WARNUNG: dashboard.yml nicht gefunden unter $SOURCE_DASHBOARD_DIR"
+fi
+
+# Kopiere DHG.json Dashboard-Datei
+if [ -f "$SOURCE_DASHBOARD_DIR/DHG.json" ]; then
+  sudo cp "$SOURCE_DASHBOARD_DIR/DHG.json" "$TARGET_DASHBOARD_JSON_DIR/DHG.json"
+  echo "✔️ DHG.json kopiert nach $TARGET_DASHBOARD_JSON_DIR"
+else
+  echo "⚠️ WARNUNG: DHG.json nicht gefunden unter $SOURCE_DASHBOARD_DIR"
+fi
+
+# Rechte setzen (für Grafana: UID 472)
+sudo chown -R 472:472 "$BASE_DIR/grafana"
+
+echo "📊 Grafana Dashboards vorbereitet."
+
+
+
 echo "✅ Setup abgeschlossen. Du kannst den Stack jetzt in Portainer deployen."
