@@ -17,7 +17,7 @@ LABEL org.opencontainers.image.version="1.0"
 
 EXPOSE 8080
 
-# Copy binary from builder stage
+# Copy binary from builder stage 
 COPY --from=builder /src/hdg-exporter-raspi /hdg-exporter-raspi
 
 # Optional: add timezone data or certs if needed (see Hinweis unten)
