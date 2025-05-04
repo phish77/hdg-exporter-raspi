@@ -59,7 +59,7 @@ A Docker image is available at `ghcr.io/srt/hdg-exporter`. A sample `docker-comp
 
 ## Configuration of Environment Variables
 
-HDG Exporter Raspi is configured via environment variables. The following variables are supported and must be set when creating the stack in Portainer.io:
+HDG Exporter Raspi is configured via environment variables. Use the .env.example file and save it in /srv/hdg-exporter/.env on your server and fill in your variables. The following variables are supported and must be set when creating the stack in Portainer:
 
 | Variable                 | Description                                                                                                                                            | Example               |
 |--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
