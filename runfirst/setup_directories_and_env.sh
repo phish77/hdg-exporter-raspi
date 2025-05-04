@@ -18,7 +18,7 @@ sudo mkdir -p $BASE_DIR/prometheus/config
 sudo mkdir -p $BASE_DIR/prometheus/data
 
 # Beispiel .env, falls noch nicht vorhanden
-ENV_FILE="$BASE_DIR/hdg-exporter/.env"
+ENV_FILE="$BASE_DIR/hdg-exporter/app.env"
 if [ ! -f "$ENV_FILE" ]; then
   echo "GRAFANA_ADMIN_PASSWORD=changeme" > "$ENV_FILE"
   echo "HDG_ENDPOINT=http://192.168.178.88" >> "$ENV_FILE"
