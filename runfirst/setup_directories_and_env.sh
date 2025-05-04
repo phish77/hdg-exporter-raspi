@@ -100,7 +100,7 @@ sudo chmod -R 755 "$BASE_DIR/hdg-exporter"
 
 
 # 📦 Grafana Dashboards kopieren (falls noch nicht vorhanden)
-SOURCE_DASHBOARD_DIR="$(dirname "$0")/../sample/grafana/provisioning/dashboards"
+SOURCE_DASHBOARD_DIR="$(cd "$(dirname "$0")/../sample/grafana/provisioning/dashboards" && pwd)"
 TARGET_DASHBOARD_DEF_DIR="$BASE_DIR/grafana/provisioning/dashboards"
 TARGET_DASHBOARD_JSON_DIR="$BASE_DIR/grafana/dashboards"
 
