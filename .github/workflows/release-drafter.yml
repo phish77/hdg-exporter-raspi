@@ -1,57 +1,19 @@
-# Vorlage für automatisches Release-Changelog
-name-template: 'v$NEXT_PATCH_VERSION'
-tag-template: 'v$NEXT_PATCH_VERSION'
+name: Release Drafter
 
-categories:
-  - title: '🚀 Features'
-    labels:
-      - 'feature'
-      - 'enhancement'
-  - title: '🐛 Bug Fixes'
-    labels:
-      - 'bug'
-      - 'fix'
-  - title: '🧰 Maintenance'
-    labels:
-      - 'chore'
-      - 'refactor'
-      - 'cleanup'
-  - title: '📦 Dependencies'
-    labels:
-      - 'dependencies'
-  - title: '📝 Dokumentation'
-    labels:
-      - 'docs'
-  - title: '🔧 Konfiguration & CI'
-    labels:
-      - 'ci'
-      - 'config'
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
 
-change-template: '- $TITLE (#$NUMBER)'
-no-changes-template: '*Keine relevanten Änderungen seit dem letzten Release.*'
-
-version-resolver:
-  major:
-    labels:
-      - 'breaking'
-  minor:
-    labels:
-      - 'feature'
-      - 'enhancement'
-  patch:
-    labels:
-      - 'bug'
-      - 'fix'
-      - 'chore'
-      - 'docs'
-      - 'ci'
-      - 'dependencies'
-
-template: |
-  ## 📦 Release Notes für $NEXT_PATCH_VERSION
-
-  $CHANGES
-
-  ---
-
-  🕒 Erstellt automatisch mit [Release Drafter](https://github.com/release-drafter/release-drafter)
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        with:
+          config-name: release-drafter.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
