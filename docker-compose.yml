@@ -3,6 +3,8 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     restart: unless-stopped
+    labels:
+      backup-stop: "true"
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -10,8 +12,8 @@ services:
       - "--web.console.templates=/etc/prometheus/consoles"
       - "--web.enable-lifecycle"
     volumes:
-      - /home/docker/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
+      - /srv/prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - /srv/prometheus/data:/prometheus
     ports:
       - "9090:9090"
     healthcheck:
@@ -19,19 +21,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - central-network
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     restart: unless-stopped
+    labels:
+      backup-stop: "true"
     environment:
       GF_USERS_DEFAULT_THEME: light
       GF_SECURITY_ADMIN_USER: lokaladmin
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
     volumes:
-      - grafana-data:/var/lib/grafana
-      - /home/docker/docker/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - /home/docker/docker/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - /srv/grafana/data:/var/lib/grafana
+      - /srv/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - /srv/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     ports:
       - "3000:3000"
     healthcheck:
@@ -39,11 +45,15 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - central-network
 
   hdg-exporter:
     image: ghcr.io/phish77/hdg-exporter-raspi:latest
     container_name: hdg-exporter-raspi
     restart: unless-stopped
+    labels:
+      backup-stop: "true"
     environment:
       HDG_ENDPOINT: ${HDG_ENDPOINT}
       HDG_LANGUAGE: ${HDG_LANGUAGE}
@@ -55,7 +65,9 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - central-network
 
-volumes:
-  grafana-data:
-  prometheus-data:
+networks:
+  central-network:
+    external: true
