@@ -1,5 +1,12 @@
 #!/bin/bash
 
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🛠️  Willkommen im Setup der persistenten Verzeichnisse"
+echo "   und der Environment-Variablen für HDG-Exporter!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
 # Diese Datei vor dem ersten Stack-Deploy ausführen
 BASE_DIR="/srv"
 ENV_FILE="$BASE_DIR/hdg-exporter/app.env"
